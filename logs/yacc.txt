@@ -1,0 +1,372 @@
+s: a s |a
+a: e';' {printf("e =%g\n",$1);}
+  | ass ';'
+  | re ';'
+  | if
+  | def
+  |for
+  |print
+  |
+   EXIT		{exit(0);}
+  
+
+e: FLOAT  {$$ = $1;}
+  | ID    {$$ = in[$1];}
+  | NUMBER   {$$ = $1;}
+  |'('e')' {$$=$2;}
+  | e'+'e {$$ = $1 + $3;}
+  | e'-'e {$$ = $1 - $3;}
+  | e'*'e {$$ = $1 * $3;}
+  | e'/'e {if($3 == 0)
+           yyerror("division on zero");
+	   else
+	   $$ = $1 / $3;}
+  |'-'NUMBER {$$ = -$2 ;} %prec '*'
+  ;
+
+
+
+
+
+
+
+
+
+%{
+#include<stdio.h>
+#include "y.tab.h"
+void yyerror(char *);
+int in[26];
+float fl[26];
+char ch[26];
+char* st[26];
+	
+%}
+
+%union{
+ int i;
+ float f;
+ char c;
+ char * s;
+ int l;
+ }
+%token IF THEN ELSE PRINT EXIT FOR DO WHILE
+%token <i> NUMBER
+%token <f>  FLOAT
+%token <l>  ID
+%token <c>  CHAR
+%token <s>  STRING
+%token <i> INTF  
+%token <f> FLOATF 
+%token <c> CHARF 
+%token <s> STRINGF
+%start s
+%left  '+' '-'
+%left  '*' '/'
+%type <f> e
+%type <f> ass
+%type <f> re
+%type <i> assi
+%type <f> assf
+%type <c> assc
+%type <s> asss
+%type <i> do
+
+
+%%
+s: a s |a
+a: e';' {printf("e =%g\n",$1);}
+  | ass ';'
+  | re ';'
+  | if
+  | def
+  |for
+  |print
+  |
+   EXIT		{exit(0);}
+  
+
+e: FLOAT  {$$ = $1;}
+  | ID    {$$ = in[$1];}
+  | NUMBER   {$$ = $1;}
+  |'('e')' {$$=$2;}
+  | e'+'e {$$ = $1 + $3;}
+  | e'-'e {$$ = $1 - $3;}
+  | e'*'e {$$ = $1 * $3;}
+  | e'/'e {if($3 == 0)
+           yyerror("division on zero");
+	   else
+	   $$ = $1 / $3;}
+  |'-'NUMBER {$$ = -$2 ;} %prec '*'
+  ;
+
+counter: inc
+        |dec
+
+inc:'+''+'ID     {if(in[$3]==0 ||fl[$3]==0)
+                        printf("not define\n");
+			else 
+			{
+			if(in[$3]!=0)
+			in[$3]=in[$3]+1; 
+			else 
+		        fl[$3]=in[$3]+1;   //error
+			}}
+   |ID'+''+'     {if(in[$1]==0 ||fl[$1]==0)
+                        printf("not define\n");
+			else 
+			{
+			if(in[$1]!=0)
+			in[$1]=in[$1]+1; 
+			else 
+		        fl[$1]=in[$1]+1;
+			}}
+
+dec:'-''-'ID     {if(in[$3]==0 ||fl[$3]==0)
+                        printf("not define\n");
+			else 
+			{
+			if(in[$3]!=0)
+			in[$3]=in[$3]-1; 
+			else 
+		        fl[$3]=in[$3]-1;
+			}}
+   |ID'-''-'     {if(in[$1]==0 ||fl[$1]==0)
+                        printf("not define\n");
+			else 
+			{
+			if(in[$1]!=0)
+			in[$1]=in[$1]-1; 
+			else 
+		        fl[$1]=in[$1]-1;
+			}}
+
+ass: ID'='e {in[$1] = $3;}
+   |assi   ';'
+   |assf   ';'
+   |assc   ';'
+   |asss   ';'
+ (!=0) declared but will talke value
+assi: ID '=' NUMBER  {if( in[$1]!=0||fl[$1]!=0)
+			{
+			   printf("this variable  will take Value  \n");
+                           in[$1]=$3;
+			}
+		   else
+			   printf("this variable can't be taken plaese decleare it  \n");
+
+		        }
+				
+ assf: ID '=' FLOAT {fl[$1]=$3;}
+ assc: ID '=' CHAR  {ch[$1]=$3;}
+ asss: ID '=' STRING {st[$1]=$3;}
+
+ def : INTF ID ';'   {if( in[$2]!=0||fl[$2]!=0||ch[$2]!='\0'||st[$2]!='\0')
+			printf("this variable has been defined before \n");
+			else
+			{
+			    in[$2]=-1; 
+				printf("this variable will decleare\n");
+			
+				}
+				}
+
+     | INTF ID '=' NUMBER ';' {if( in[$2]!=0||fl[$2]!=0||ch[$2]!='\0'||st[$2]!='\0')
+				
+				printf("this variable has been defined before \n");
+			      
+					
+			else
+			{
+				printf("this variable will take value  \n");
+				in[$2]=$4;
+				}
+				}
+				 
+    | FLOATF ID ';' {if( in[$2]!=0||fl[$2]!=0||ch[$2]!='\0'||st[$2]!='\0')
+			printf("this variable has been defined before \n");
+			else
+			{
+			    fl[$2]=-1; 
+				printf("this variable will decleare\n");
+			
+				}
+				}
+   | FLOATF ID '=' FLOAT ';' {if( in[$2]!=0||fl[$2]!=0||ch[$2]!='\0'||st[$2]!='\0')
+				
+				printf("this variable has been defined before \n");
+			      
+				
+			else
+			{
+				printf("this variable will take value  \n");
+				fl[$2]=$4;
+				}
+					}
+   | CHARF ID ';' {if( in[$2]!=0||fl[$2]!=0||ch[$2]!='\0'||st[$2]!='\0')
+			printf("this variable has been defined before \n");
+			else
+			{
+			    ch[$2]=-1; 
+				printf("this variable will decleare\n");
+			
+				}
+				}
+   | CHARF ID '=' CHAR ';' {if( in[$2]!=0||fl[$2]!=0||ch[$2]!='\0'||st[$2]!='\0')
+				
+				printf("this variable has been defined before \n");
+			      
+				
+			else
+			{
+				printf("this variable will take value  \n");
+				ch[$2]=$4;
+				}
+					}
+   | STRINGF ID ';' {if( in[$2]!=0||fl[$2]!=0||ch[$2]!='\0'||st[$2]!='\0')
+			printf("this variable has been defined before \n");
+			else
+			{
+			    st[$2]=-1; 
+				printf("this variable will decleare\n");
+			
+				}
+				}
+   | STRINGF ID '=' STRING ';' {if( in[$2]!=0||fl[$2]!=0||ch[$2]!='\0'||st[$2]!='\0')
+				
+				printf("this variable has been defined before \n");
+			      
+				
+			else
+			{
+				printf("this variable will take value  \n");
+				st[$2]=$4;
+				}
+					}
+					
+
+ print: PRINT '(' ID ')' ';'  { if(in[$3]==0 && fl[$3]==0 &&ch[$3]=='\0' && st[$3]=="\0" )
+				printf("variable not decleared beofe\n");
+		             else 
+			       if(in[$3]!=0)	
+			         printf("%d\n",in[$3]);
+			       else if(fl[$3]!=0)
+				 printf("%f\n",fl[$3]);
+			       else if(ch[$3]!=0)
+				 printf("%c\n",ch[$3]);
+			       else if(st[$3]!=0)
+				 printf("%s\n",st[$3]);
+			} 	
+
+     | PRINT '(' STRING ')' ';'   {printf("%s\n",$3);}
+
+re: e
+   |e '<' e  { if($1<$3)
+               $$ = 1;
+	       else
+	       $$ = 0;
+	       }
+
+   |e '>' e  { if($1>$3)
+               $$ = 1;
+	       else
+	       $$ = 0;
+	       }
+
+   |e '<''=' e  { if($1<=$4)
+               $$ = 1;
+	       else
+	       $$ = 0;
+	       }
+
+   |e '>''=' e  { if($1>=$4)
+               $$ = 1;
+	       else
+	       $$ = 0;
+	       }
+
+   |e '=''=' e  { if($1==$4)
+               $$ = 1;
+	       else
+	       $$ = 0;
+	       }
+
+   |e '!''=' e  { if($1!=$4)
+               $$ = 1;
+	       else
+	       $$ = 0;
+	       }
+    ;
+
+if:IF'(' re ')' THEN a ';'  {($3 == 1)?printf("IF is Executed"):printf("ELSE is Executed");}
+  |IF'(' re ')' THEN '{' a '}' ELSE '{' a '}'  {($3 == 1)?printf("IF is Executed"):printf("ELSE is Executed");}
+  ;
+
+for: FOR '(' ass ID '<' NUMBER ';' counter ')''{'s')'';'  {   int b=in[$4];
+							int x=1;
+                                                        while (b<$6)
+							{
+							printf("loop excute=%d\n ",x);
+							x++;
+							b++;
+							}}
+  |  FOR'(' ass ID '>' NUMBER ';'counter')''{'s'}'';'      {   int b=in[$4];
+							int x=1;
+                                                        while (b>$6)
+							{
+							printf("loop excute=%d\n ",x);
+							x++;
+							b--;
+							}}
+
+						
+while: WHILE '(' ID '<' NUMBER  ')''('s counter ';'')'';'  {   int b=in[$3];
+							int x=1;
+                                                        while (b<$5)
+							{
+							printf("loop excute=%d\n ",x);
+							x++;
+							b++;
+							}}
+  |  WHILE '(' ID '>' NUMBER  ')''('s counter ';'')'';'       {   int b=in[$3];
+							int x=1;
+                                                        while (b>$5)
+							{
+							printf("loop excute=%d\n ",x);
+							x++;
+							b--;
+							}}
+
+do: DO '{'s counter ';''}'WHILE'(' ID '<' NUMBER  ')'';'  {   int b=in[$9];
+							int x=1;
+                                                        while (b<$11)
+							{
+							printf("loop excute=%d\n ",x);
+							x++;
+							b++;
+							}}
+  |  DO '{'s counter ';''}'WHILE'(' ID '<' NUMBER  ')'';'       {   int b=in[$9];
+							int x=1;
+                                                        while (b>$11)
+							{
+							printf("loop excute=%d\n ",x);
+							x++;
+							b--;
+							}}
+
+%%
+
+void yyerror(char *s){
+printf("Error in : %s",s);
+}
+
+int main()
+{
+yyparse();
+yyparse();
+yyparse();
+yyparse();
+system("pause");
+	return 0;
+}
+
